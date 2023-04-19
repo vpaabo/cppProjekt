@@ -1,20 +1,39 @@
+# Compiler settings
 CXX = g++
-CXXFLAGS = -Wall -Werror -std=c++11
-SRC = test.cpp
-OBJ = $(SRC:.cpp=.o)
-RM = test.o
-EXEC = test.exe
+CXXFLAGS = -Wall -Wextra -pedantic -std=c++11
 
-all: $(EXEC)
+# Directories
+SRCDIR = src
+OBJDIR = obj
+INCDIR = include
+LIBDIR = lib
+BINDIR = bin
+TESTDIR = tests
 
-$(EXEC): $(OBJ)
-	$(CXX) $(CXXFLAGS) $(OBJ) -o $(EXEC)
+# Files
+SRC = $(wildcard $(SRCDIR)/*.cpp)
+OBJ = $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRC))
+INC = $(wildcard $(INCDIR)/*.h)
+LIB = $(wildcard $(LIBDIR)/*.a)
 
-%.o: %.cpp
+# Executable
+TARGET = $(BINDIR)/myprogram
+
+# Build rules
+all: $(TARGET)
+
+$(TARGET): $(OBJ)
+	$(CXX) $(CXXFLAGS) $(OBJ) $(LIB) -o $(TARGET)
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(INC)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-run: $(EXEC)
-	./$(EXEC)
+# Test rules
+test: $(TESTDIR)/test
 
+$(TESTDIR)/test: $(OBJ)
+	$(CXX) $(CXXFLAGS) $(OBJ) $(LIB) $(TESTDIR)/test.cpp -o $(TESTDIR)/test
+
+# Cleanup rules
 clean:
-	rm -f $(RM) $(EXEC)
+	rm -f $(OBJDIR)/*.o $(TARGET) $(TESTDIR)/test
