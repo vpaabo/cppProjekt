@@ -1,6 +1,6 @@
 # Compiler settings
 CXX = g++
-CXXFLAGS = -Wall -Wextra -pedantic -std=c++11
+CXXFLAGS = -Wall -Wextra -pedantic -std=c++11 -mconsole
 
 # Directories
 SRCDIR = src
@@ -17,7 +17,7 @@ INC = $(wildcard $(INCDIR)/*.h)
 LIB = $(wildcard $(LIBDIR)/*.a)
 
 # Executable
-TARGET = $(BINDIR)/myprogram
+TARGET = $(BINDIR)/myprogram.exe
 
 # Build rules
 all: $(TARGET)
@@ -29,11 +29,11 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(INC)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Test rules
-test: $(TESTDIR)/test
+test: $(TESTDIR)/test.exe
 
 $(TESTDIR)/test: $(OBJ)
 	$(CXX) $(CXXFLAGS) $(OBJ) $(LIB) $(TESTDIR)/test.cpp -o $(TESTDIR)/test
 
 # Cleanup rules
 clean:
-	rm -f $(OBJDIR)/*.o $(TARGET) $(TESTDIR)/test
+	rm -f $(OBJDIR)/*.o $(TARGET) $(TESTDIR)/test.exe
