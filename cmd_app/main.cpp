@@ -1,18 +1,24 @@
-#include "func.h"
 #include <iostream>
 #include <string>
+#include <cmath>
+
+#include "include/Token.h"
+#include "include/Lexer.h"
+
 using namespace std;
 
 int main(int argc, char const *argv[])
 {
-    
-    string expr;
-    cout << "Sisesta matemaatiline avaldis:\n";
-    cin >> expr;
-    //cout << expr << "\n";
-    Parser parser{expr};
+    string s{"51+(3/200-4)*7"};
+    StringReader stringReader{s};
+    Lexer lexer{stringReader};
 
-    cout << "Avaldise v22rtus: " << parser.expression() << "\n";
-    
+    vector<Token> tokens = lexer.readAllTokens();
+
+    cout << s << "\n";
+    for (Token t : tokens){
+        cout << t << ", ";
+    }
+
     return 0;
 }

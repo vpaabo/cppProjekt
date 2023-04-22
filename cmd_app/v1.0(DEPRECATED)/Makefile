@@ -1,12 +1,8 @@
 CXX = g++
 CXXFLAGS = -Wall -Werror -std=c++11
-
-SRC = $(wildcard src/*.cpp)
-INCL = $(wildcard include/*.h)
-# Makefile juures tohib olla ainult üks .cpp fail (ehk main)
-MAIN = $(wildcard *.cpp)
-OBJ = $(SRC:.cpp=.o) $(MAIN:.cpp=.o)
-RM = $(OBJ)
+SRC = func.h func.cpp main.cpp
+OBJ = $(SRC:.cpp=.o)
+RM = func.o main.o
 EXEC = main.exe
 
 all: $(EXEC)
