@@ -35,6 +35,37 @@ Token Lexer::getToken() {
         return Token::EOFRFR;
     }
 
+    // Look for an identifier or function name
+    if (isalpha(c)) {
+        tokenBuffer = c;
+        c = input.get();
+
+        // Look for zero or more letters or digits
+        while (isalnum(c)) {
+            tokenBuffer += c;
+            c = input.get();
+        }
+
+        // The current character doesn't belong to our identifier
+        input.putback(c);
+
+        // Check for a function name
+        if (tokenBuffer == "ln") {
+            return Token::LN;
+        } else if (tokenBuffer == "exp") {
+            return Token::EXP;
+        } else if (tokenBuffer == "log") {
+            return Token::LOG;
+        } else if (tokenBuffer == "exp10") {
+            return Token::EXP10;
+        } else if (tokenBuffer == "sqrt") {
+            return Token::SQRT;
+        }
+
+        // If it doesn't match any function, then it must be an identifier (e.g. pi or e)
+        return Token::ID;
+    }
+
     // Look for a digit
     if (isdigit(c)) {
         tokenBuffer = c;
@@ -89,6 +120,8 @@ Token Lexer::getToken() {
         case '/':
         case '(':
         case ')':
+        case '^':
+        case '%':
             return Token(c);
     }
 
