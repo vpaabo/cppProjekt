@@ -29,8 +29,6 @@ public:
     Lexer(Lexer&&) = delete;
     Lexer& operator=(Lexer&&) = delete;
 
-    ~Lexer() { delete input_ptr; };
-
     Token getCurrentToken() const { return currentToken; };
     string getTokenText() const { return currentTokenText; };
 
