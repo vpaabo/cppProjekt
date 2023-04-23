@@ -5,8 +5,6 @@
 using SyntaxError = Error<2>;
 using RuntimeError = Error<3>;
 
-map<string, double> symbolTable;
-
 class Parser {
     Lexer* lexer_ptr;
 

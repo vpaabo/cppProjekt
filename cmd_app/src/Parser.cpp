@@ -2,6 +2,8 @@
 
 #include "../include/Parser.h"
 
+map<string, double> symbolTable;
+
 Parser::Parser() {
     symbolTable["pi"] = 4.0 * atan(1.0);
     symbolTable["e"] = exp(1.0);
