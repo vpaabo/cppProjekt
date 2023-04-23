@@ -1,145 +1,97 @@
-#include <iostream>
-#include <string>
-#include <vector>
-#include "../include/Token.h"
 #include "../include/Lexer.h"
 
-using namespace std;
-
-StringReader::StringReader(string s) : input(s), position(0) {}
-
-int StringReader::read()
-{
-    if (position >= (int)input.length())
-    {
-        return -1;
-    }
-    return input[position++];
+Lexer::Lexer(istream& is) : input_ptr{&is} {
+    init();
 }
 
-int StringReader::peek()
-{
-    if (position >= (int)input.length())
-    {
-        return -1;
-    }
-    return input[position];
+Lexer::Lexer(istream* is_ptr) : input_ptr{is_ptr} {
+    init();
 }
 
-void StringReader::close()
-{
-    input = "";
-    position = 0;
+void Lexer::init() {
+    currentToken = getToken();
+    currentTokenText = tokenBuffer;
 }
 
-Lexer::Lexer(StringReader _sr) : reader{_sr} {}
-
-vector<Token> Lexer::readAllTokens()
-{
-    vector<Token> tokens{};
-
-    Token token;
-    do
-    {
-        token = readNextToken();
-        tokens.push_back(token);
-    } while (token.getType() != EOFRFR);
-    return tokens;
-}
-
-void Lexer::consume()
-{
-    if (current == TERMINATOR)
-    {
-        throw runtime_error("Reading passed terminator!");
-    }
-    read();
-    pos++;
-}
-char Lexer::peek()
-{
-    if (current == START)
-        read();
-    return current;
-}
-void Lexer::read()
-{
-    try
-    {
-        int i = reader.read();
-        current = (i == -1) ? TERMINATOR : static_cast<char>(i);
-    }
-    catch (ios_base::failure &e)
-    {
-        throw runtime_error("IO Exception: " + string(e.what()));
+void Lexer::advance() {
+    if (currentToken != Token::EOFRFR) {
+        currentToken = getToken();
+        currentTokenText = tokenBuffer;
     }
 }
 
-Token Lexer::readNextToken()
-{
-    while (peek() != TERMINATOR)
-    {
-        if (isdigit(peek()))
-        {
-            return readInteger();
-        }
-        else if (isspace(peek()))
-        {
-            consume();
-        }
-        else if (peek() == '(')
-        {
-            consume();
-            return singleCharToken(LPAREN);
-        }
-        else if (peek() == ')')
-        {
-            consume();
-            return singleCharToken(RPAREN);
-        }
-        else if (peek() == '+')
-        {
-            consume();
-            return singleCharToken(PLUS);
-        }
-        else if (peek() == '-')
-        {
-            consume();
-            return singleCharToken(MINUS);
-        }
-        else if (peek() == '*')
-        {
-            consume();
-            return singleCharToken(TIMES);
-        }
-        else if (peek() == '/')
-        {
-            consume();
-            return singleCharToken(DIV);
-        }
-        else
-        {
-            throw runtime_error("Unexpected symbol");
-        }
-    }
-    return Token(EOFRFR, pos, 0);
-}
-Token Lexer::singleCharToken(Type type)
-{
-    Token t{type, pos - 1, 1};
-    return t;
-}
-Token Lexer::readInteger()
-{
-    int result{peek() - '0'};
-    consume();
+Token Lexer::getToken() {
+    istream& input = *input_ptr;
+    tokenBuffer.clear();
+    char c = input.get();
 
-    int initPos{pos};
-    while (isdigit(peek()))
-    {
-        result = 10 * result + peek() - '0';
-        consume();
+    // Skip whitespace
+    while (isspace(c)) {
+        c = input.get();
     }
-    Token t{INTEGER, result, pos, pos - initPos};
-    return t;
+
+    // If input is empty, then we return EOF
+    if (!input) {
+        return Token::EOFRFR;
+    }
+
+    // Look for a digit
+    if (isdigit(c)) {
+        tokenBuffer = c;
+        c = input.get();
+
+        // Look for more digits
+        while(isdigit(c)) {
+            tokenBuffer += c;
+            c = input.get();
+        }
+
+        // Look for a decimal point. Can be followed by zero or more digits
+        if (c == '.') {
+            tokenBuffer += c;
+            c = input.get();
+
+            while (isdigit(c)) {
+                tokenBuffer += c;
+                c = input.get();
+            }
+        }
+
+        input.putback(c);
+        return Token::NUMBER;
+    }
+
+    // Number can start with a decimal point too
+    if (c == '.') {
+        tokenBuffer = c;
+        c = input.get();
+
+        // If number starts with a decimal point, then it must be followed by a digit
+        if (!isdigit(c)) {
+            throw LexicalError{tokenBuffer += c};
+        }
+
+        while (isdigit(c)) {
+            tokenBuffer += c;
+            c = input.get();
+        }
+
+        input.putback(c);
+        return Token::NUMBER;
+    }
+
+    // Check for one-character operator
+    tokenBuffer = c;
+    switch (c) {
+        case '+':
+        case '-':
+        case '*':
+        case '/':
+        case '(':
+        case ')':
+            return Token(c);
+    }
+
+    // Anything else is an error.
+    throw LexicalError{tokenBuffer};
 }

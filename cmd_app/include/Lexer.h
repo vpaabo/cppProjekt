@@ -1,51 +1,43 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include <iostream>
+#include <sstream>
 #include <string>
-#include <vector>
+
 #include "Token.h"
+#include "Error.h"
 
 using namespace std;
 
-class StringReader
-{
-private:
-    string input;
-    int position;
+using LexicalError = Error<1>;
+
+class Lexer {
+    istream* input_ptr;                 // Input stream (i.e. stream of user-inputted matematical expression)
+    Token currentToken;
+    string currentTokenText;
+    string tokenBuffer;             // The text of the token that getToken() found
+
+    void init();                    // Common method for constructors
+    Token getToken();               // Turns characters from input into tokens
 
 public:
-    StringReader(string s);
+    explicit Lexer(istream& is);
+    explicit Lexer(istream* is_ptr);
 
-    int read();
+    // Lexer goes with the parser, so it shouldn't be copied or moved
 
-    int peek();
+    Lexer(const Lexer&) = delete;
+    Lexer& operator=(const Lexer&) = delete;
 
-    void close();
-};
+    Lexer(Lexer&&) = delete;
+    Lexer& operator=(Lexer&&) = delete;
 
-class Lexer
-{
-private:
-    const char TERMINATOR = '\0';
-    const char START = '\1';
+    ~Lexer() { delete input_ptr; };
 
-    StringReader reader;
-    char current = START;
-    int pos = 0;
+    Token getCurrentToken() const { return currentToken; };
+    string getTokenText() const { return currentTokenText; };
 
-public:
-    Lexer(StringReader _sr);
-
-    vector<Token> readAllTokens();
-
-    void consume();
-    char peek();
-    void read();
-
-    Token readNextToken();
-    Token singleCharToken(Type type);
-    Token readInteger();
+    void advance();                 // Read the next token from the input stream
 };
 
 #endif

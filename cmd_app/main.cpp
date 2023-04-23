@@ -1,24 +1,19 @@
 #include <iostream>
-#include <string>
-#include <cmath>
 
-#include "include/Token.h"
-#include "include/Lexer.h"
+#include "include/Parser.h"
 
-using namespace std;
-
-int main(int argc, char const *argv[])
+int main()
 {
-    string s{"51+(3/200-4)*7"};
-    StringReader stringReader{s};
-    Lexer lexer{stringReader};
-
-    vector<Token> tokens = lexer.readAllTokens();
-
-    cout << s << "\n";
-    for (Token t : tokens){
-        cout << t << ", ";
+    Parser parser;
+    string s{"51.3+(3/200-4)*7"};
+    
+    try {
+        cout << parser(s) << '\n';
+    } catch (const LexicalError& e) {
+        cerr << "Lexical error: " << e << '\n';
+    } catch (const SyntaxError& e) {
+        cerr << "Syntax error: " << e << '\n';
+    } catch (const RuntimeError& e) {
+        cerr << "Runtime error: " << e << '\n';
     }
-
-    return 0;
 }
