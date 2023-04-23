@@ -2,12 +2,9 @@
 #define LEXER_H
 
 #include <sstream>
-#include <string>
 
 #include "Token.h"
 #include "Error.h"
-
-using namespace std;
 
 using LexicalError = Error<1>;
 
